@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Om Hub – Malayali Video Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #000; color: white; height: 100vh; display: flex; flex-direction: column; }
+
+    /* === Welcome Screen === */
+    #welcome-screen {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center; padding: 20px;
+      box-sizing: border-box;
+    }
+    #welcome-screen h2 { color: limegreen; margin-bottom: 10px; }
+    #welcome-screen p { margin: 5px 0; line-height: 1.4; }
+    .enter-btn {
+      margin-top: 15px; padding: 10px 20px;
+      background: dodgerblue; border: none;
+      border-radius: 6px; color: white;
+      font-size: 16px; cursor: pointer;
+    }
+
+    /* Premium box */
+    .premium-box {
+      margin-top: 25px; border: 1px solid gold; padding: 20px;
+      border-radius: 10px; background: rgba(255, 215, 0, 0.1);
+      width: 100%; max-width: 400px; box-sizing: border-box;
+    }
+    .premium-box h3 { color: orange; margin-bottom: 15px; }
+    .premium-box button {
+      display: block; width: 100%; margin-top: 10px;
+      padding: 10px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 15px;
+    }
+    .premium-box .pay-btn { background: gold; }
+    .premium-box .notify-btn { background: limegreen; color: white; }
+    .premium-box .unlock-btn { background: dodgerblue; color: white; }
+
+    /* === Main App === */
+    #main-app { display: none; flex: 1; flex-direction: column; height: 100%; width: 100%; }
+    #header { background: #111; padding: 10px; text-align: center; border-bottom: 2px solid lime; }
+    #header h2 { margin: 0; font-size: 18px; color: lime; }
+    #online-count { color: gold; font-size: 14px; margin-top: 5px; }
+
+    #video-container { flex: 1; display: flex; flex-direction: column; background: #000; position: relative; }
+    video { background: #333; border: 2px solid lime; border-radius: 6px; object-fit: cover; width: 100%; height: 100%; }
+    #stranger-video { flex: 1; }
+    #self-video { position: absolute; top: 10px; right: 10px; width: 30%; height: 20%; }
+
+    #bottom-section { flex: none; background: #111; border-top: 2px solid lime; padding: 10px; display: flex; flex-direction: column; height: 40%; }
+    #chat-messages { flex: 1; overflow-y: auto; background: #000; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+    #chat-input { display: flex; gap: 5px; margin-bottom: 10px; }
+    #chat-input input { flex: 1; padding: 8px; border: none; border-radius: 6px; }
+    #chat-input button { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; }
+    #controls { text-align: center; }
+    #controls button, #controls select { background: #007bff; color: white; border: none; padding: 10px 15px; margin: 5px; border-radius: 6px; font-size: 16px; cursor: pointer; }
+    #controls select { color: black; }
+    .vip { color: gold; font-weight: bold; }
+    .system-msg { color: lime; font-weight: bold; }
+
+    /* Landscape mode */
+    @media screen and (orientation: landscape) {
+      #main-app { flex-direction: column; }
+      #video-container { flex-direction: row; width: 100%; height: 100vh; }
+      #stranger-video, #self-video { position: static; flex: 1; width: 50%; height: 100vh; border-radius: 0; }
+      #bottom-section { position: relative; width: 100%; height: auto; max-height: 60vh; overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- === Welcome Screen === -->
+  <div id="welcome-screen">
+    <h2>⚠️ Welcome to Om Hub</h2>
+    <p>You must be <b>18+</b> to enter.<br>No nudity, hate speech, or harassment.</p>
+    <p>Creator: @revising_dude_offical</p>
+    <p>🌟 Where Malayalis find each other 🥰 (not for marriage 😸)<br>
+    ✨ Chat. Connect. Laugh. A premium hangout for Malayalis worldwide 🌐</p>
+    <button class="enter-btn" onclick="enterApp()">I Agree & Enter</button>
+
+    <div class="premium-box">
+      <h3>🔥 Upgrade to Premium</h3>
+      <ul style="text-align:left; margin:0 auto; max-width:300px;">
+        <li>⭐ Get a VIP Badge & Title</li>
+        <li>💯 100% Girl-Only Matchmaking</li>
+        <li>🎥 Unlock Ultra HD (1080p) Video</li>
+        <li>⚡ Priority Connection Speed</li>
+      </ul>
+      <p style="margin-top:10px;">Price: ₹199 (One-time)<br>Pay via FamPay UPI: <b>7025871392@fam</b></p>
+      <button class="pay-btn" onclick="payNow()">💳 Pay Now</button>
+      <button class="notify-btn" onclick="notifyOwner()">✅ I Paid – Notify Owner</button>
+      <button class="unlock-btn" onclick="showUnlock()">🔓 I Have Code – Unlock</button>
+    </div>
+  </div>
+
+  <!-- === Main App === -->
+  <div id="main-app">
+    <div id="header">
+      <h2>Om Hub Video Chat</h2>
+      <div id="online-count">🌐 Online: <b>0</b></div>
+    </div>
+    <div id="video-container">
+      <video id="stranger-video" autoplay playsinline></video>
+      <video id="self-video" autoplay playsinline muted></video>
+    </div>
+
+    <div id="bottom-section">
+      <div id="chat-messages"><p><b class="system-msg">System:</b> Say hi to your stranger 👋</p></div>
+      <div id="chat-input">
+        <input type="text" id="message" placeholder="Type a message...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+      <div id="controls">
+        <button onclick="startStranger()">Start</button>
+        <button style="background: green;" onclick="nextStranger()">Skip Stranger</button>
+        <button onclick="flipCamera()">Flip Camera</button>
+        <select id="cameraSelect" onchange="startCamera()">
+          <option value="user">Camera 1 (Facing front)</option>
+          <option value="environment">Camera 2 (Facing back)</option>
+        </select>
+        <select id="qualitySelect" onchange="startCamera()">
+          <option value="320x240">Low (320x240)</option>
+          <option value="640x480" selected>Medium (640x480)</option>
+          <option value="1280x720">High (1280x720)</option>
+          <option value="1920x1080" class="premium-only">Ultra (Premium)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const OWNER_WHATSAPP = "917025571392";
+    const selfVideo = document.getElementById('self-video');
+    const strangerVideo = document.getElementById('stranger-video');
+    const chatMessages = document.getElementById('chat-messages');
+    const onlineCount = document.getElementById("online-count").querySelector("b");
+
+    let localStream, peerConnection, ws;
+    let currentFacingMode = "user";
+
+    const servers = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+
+    function enterApp() {
+      document.getElementById("welcome-screen").style.display = "none";
+      document.getElementById("main-app").style.display = "flex";
+      startCamera();
+      connectSignaling();
+    }
+
+    function payNow() { window.open("upi://pay?pa=7025871392@fam&pn=OmHubPremium&am=199&cu=INR", "_blank"); }
+    function notifyOwner() {
+      const msg = encodeURIComponent("Hello, I paid ₹199, please send my Premium Code.");
+      window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${msg}`, "_blank");
+    }
+    function showUnlock() { alert("Unlock modal coming soon"); }
+
+    function addChatMessage(user, msg) {
+      const p = document.createElement("p");
+      p.innerHTML = `<b class="${user === 'System' ? 'system-msg' : ''}">${user}:</b> ${msg}`;
+      chatMessages.appendChild(p); chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function startCamera() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode }, audio: true
+        });
+        selfVideo.srcObject = localStream;
+      } catch (err) { alert("Camera error: " + err); }
+    }
+
+    function flipCamera() {
+      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+      startCamera();
+    }
+
+    function connectSignaling() {
+      ws = new WebSocket("wss://your-signaling-server.com"); // replace
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.online) onlineCount.textContent = data.online;
+      };
+    }
+
+    function startStranger() { addChatMessage("System", "🔗 Searching for a stranger..."); }
+    function nextStranger() { addChatMessage("System", "⏭️ Skipped, finding new stranger..."); }
+    function sendMessage() {
+      const input = document.getElementById("message");
+      if (input.value.trim() !== "") {
+        addChatMessage("You", input.value);
+        input.value = "";
+      }
+    }
+  </script>
+</body>
+</html>
